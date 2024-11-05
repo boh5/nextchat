@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextChat
 
-## Getting Started
+基于 Next.js 的实时在线聊天应用
 
-First, run the development server:
+## 技术栈
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **框架**: Next.js 15 (App Router)
+- **UI**: shadcn/ui + Tailwind CSS
+- **后端服务**: 
+  - 数据库: PostgreSQL (Supabase)
+  - 认证: Supabase Auth
+  - 实时通信: WebSocket (Socket.IO)
+- **ORM**: Drizzle
+- **缓存**: Redis
+- **类型安全**: TypeScript
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 主要功能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 用户认证 (Supabase Auth)
+  - 邮箱/密码登录
+  - OAuth 社交登录 (Google, GitHub)
+  - 会话管理
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 即时通讯
+  - 私聊对话
+  - 群组聊天
+  - 在线状态显示
+  - 已读/未读状态
+  - 消息通知
 
-## Learn More
+- 消息功能
+  - 文本消息
+  - 表情/贴纸
+  - 图片上传 (Supabase Storage)
+  - 消息编辑/撤回
+  - 消息历史记录
 
-To learn more about Next.js, take a look at the following resources:
+## 项目结构
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `app/`: Next.js App Router 结构的主目录
+  - `(auth)/`: 包含登录、注册等认证页面
+  - `(chat)/`: 包含聊天室、对话列表等页面
+  - `api/`: 后端 API 路由实现
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `components/`: 可复用的 React 组件
+  - `auth/`: 登录表单、注册表单等认证组件
+  - `chat/`: 消息列表、聊天输入框等聊天组件
+  - `ui/`: 按钮、输入框等基础 UI 组件
 
-## Deploy on Vercel
+- `lib/`: 项目核心逻辑
+  - `db/`: 数据库模型和查询
+  - `supabase/`: Supabase 客户端和工具
+  - `utils/`: 日期格式化、验证等通用工具
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `types/`: 全局 TypeScript 类型定义
+- `public/`: 图片、字体等静态资源
+- `styles/`: 全局 CSS 样式
