@@ -11,7 +11,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  
+
   const supabase = createClient()
 
   async function onSubmit(e: React.FormEvent) {
@@ -75,12 +75,18 @@ export function LoginForm() {
           <span className="bg-background px-2 text-muted-foreground">或</span>
         </div>
       </div>
-      <Button variant="outline" disabled={isLoading} onClick={() => supabase.auth.signInWithOAuth({
-        provider: 'github'
-      })}>
+      <Button
+        variant="outline"
+        disabled={isLoading}
+        onClick={() =>
+          supabase.auth.signInWithOAuth({
+            provider: 'github',
+          })
+        }
+      >
         <Icons.gitHub className="mr-2 h-4 w-4" />
         GitHub 登录
       </Button>
     </div>
   )
-} 
+}
