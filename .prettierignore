@@ -1,0 +1,24 @@
+# 依赖目录
+node_modules
+dist
+build
+
+# 日志文件
+*.log
+
+# 环境文件
+.env*
+
+# 缓存目录
+.cache
+.temp
+
+# 编译输出
+lib
+es
+coverage
+
+# 其他
+.DS_Store
+.idea
+.vscode 
