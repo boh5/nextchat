@@ -28,10 +28,10 @@ export function LoginForm() {
         throw error
       }
 
-      // 登录成功后重定向
+      // Redirect after successful login
       window.location.href = '/chat'
     } catch (error) {
-      console.error('登录错误:', error)
+      console.error('Login error:', error)
     } finally {
       setIsLoading(false)
     }
@@ -42,7 +42,7 @@ export function LoginForm() {
       <form onSubmit={onSubmit}>
         <div className="grid gap-4">
           <div className="grid gap-1">
-            <Label htmlFor="email">邮箱</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -52,7 +52,7 @@ export function LoginForm() {
             />
           </div>
           <div className="grid gap-1">
-            <Label htmlFor="password">密码</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
@@ -63,7 +63,7 @@ export function LoginForm() {
           </div>
           <Button disabled={isLoading}>
             {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            登录
+            Login
           </Button>
         </div>
       </form>
@@ -72,20 +72,32 @@ export function LoginForm() {
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">或</span>
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
         </div>
       </div>
       <Button
         variant="outline"
         disabled={isLoading}
-        onClick={() =>
-          supabase.auth.signInWithOAuth({
-            provider: 'github',
-          })
-        }
+        onClick={async () => {
+          setIsLoading(true)
+          try {
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: 'github',
+            })
+            if (error) {
+              throw error
+            }
+
+            window.location.href = '/chat'
+          } catch (error) {
+            console.error('Login error:', error)
+          } finally {
+            setIsLoading(false)
+          }
+        }}
       >
         <Icons.gitHub className="mr-2 h-4 w-4" />
-        GitHub 登录
+        GitHub Login
       </Button>
     </div>
   )

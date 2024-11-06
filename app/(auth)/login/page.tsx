@@ -11,11 +11,11 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+    <div className="container mx-auto flex h-screen w-screen flex-col items-center justify-center">
+      <div className="flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">登录账号</h1>
-          <p className="text-sm text-muted-foreground">输入你的邮箱和密码登录</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Sign In</h1>
+          <p className="text-sm text-muted-foreground">Enter your email and password to sign in</p>
         </div>
         <LoginForm />
       </div>
