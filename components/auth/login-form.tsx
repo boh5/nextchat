@@ -1,34 +1,58 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Icons } from '@/components/ui/icons'
+import { redirect } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+
+const formSchema = z.object({
+  email: z.string().email({
+    message: 'Please enter a valid email address',
+  }),
+  password: z.string().min(6, {
+    message: 'Password must be at least 6 characters',
+  }),
+})
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
   const supabase = createClient()
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: values.email,
+        password: values.password,
       })
 
       if (error) {
-        throw error
+        form.setError('root', { message: error.message })
+        return
       }
 
-      // Redirect after successful login
       window.location.href = '/chat'
     } catch (error) {
       console.error('Login error:', error)
@@ -37,36 +61,58 @@ export function LoginForm() {
     }
   }
 
+  useEffect(() => {
+    async function checkSession() {
+      const supabase = await createClient()
+      const session = await supabase.auth.getSession()
+      if (session.data.session) {
+        redirect('/chat')
+      }
+    }
+    checkSession()
+  }, [])
+
   return (
     <div className="grid gap-6">
-      <form onSubmit={onSubmit}>
-        <div className="grid gap-4">
-          <div className="grid gap-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className="grid gap-1">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <Button disabled={isLoading}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input {...field} type="email" disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {form.formState.errors.root && (
+            <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">
+              {form.formState.errors.root.message}
+            </div>
+          )}
+          <Button type="submit" disabled={isLoading}>
             {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
             Login
           </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t" />
@@ -78,23 +124,11 @@ export function LoginForm() {
       <Button
         variant="outline"
         disabled={isLoading}
-        onClick={async () => {
-          setIsLoading(true)
-          try {
-            const { error } = await supabase.auth.signInWithOAuth({
-              provider: 'github',
-            })
-            if (error) {
-              throw error
-            }
-
-            window.location.href = '/chat'
-          } catch (error) {
-            console.error('Login error:', error)
-          } finally {
-            setIsLoading(false)
-          }
-        }}
+        onClick={() =>
+          supabase.auth.signInWithOAuth({
+            provider: 'github',
+          })
+        }
       >
         <Icons.gitHub className="mr-2 h-4 w-4" />
         GitHub Login
