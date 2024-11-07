@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Icons } from '@/components/ui/icons'
-import { redirect } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -18,16 +17,22 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: 'Please enter a valid email address',
-  }),
-  password: z.string().min(6, {
-    message: 'Password must be at least 6 characters',
-  }),
-})
+const formSchema = z
+  .object({
+    email: z.string().email({
+      message: 'Please enter a valid email address',
+    }),
+    password: z.string().min(6, {
+      message: 'Password must be at least 6 characters',
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
-export function LoginForm() {
+export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -36,6 +41,7 @@ export function LoginForm() {
     defaultValues: {
       email: '',
       password: '',
+      confirmPassword: '',
     },
   })
 
@@ -43,7 +49,7 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
       })
@@ -55,22 +61,11 @@ export function LoginForm() {
 
       window.location.href = '/chat'
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('Sign up error:', error)
     } finally {
       setIsLoading(false)
     }
   }
-
-  useEffect(() => {
-    async function checkSession() {
-      const supabase = await createClient()
-      const session = await supabase.auth.getSession()
-      if (session.data.session) {
-        redirect('/chat')
-      }
-    }
-    checkSession()
-  }, [])
 
   return (
     <div className="grid gap-6">
@@ -102,6 +97,19 @@ export function LoginForm() {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {form.formState.errors.root && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">
               {form.formState.errors.root.message}
@@ -109,7 +117,7 @@ export function LoginForm() {
           )}
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            Login
+            Create account
           </Button>
         </form>
       </Form>
@@ -127,11 +135,14 @@ export function LoginForm() {
         onClick={() =>
           supabase.auth.signInWithOAuth({
             provider: 'github',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
           })
         }
       >
         <Icons.gitHub className="mr-2 h-4 w-4" />
-        GitHub Login
+        Continue with GitHub
       </Button>
     </div>
   )

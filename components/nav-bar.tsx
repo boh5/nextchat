@@ -24,7 +24,9 @@ export function NavBar() {
     })
 
     // 监听认证状态变化
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
 
@@ -39,8 +41,8 @@ export function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full px-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex justify-between h-14 items-center">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-14 items-center justify-between">
         <div className="mr-4 flex">
           <Link className="mr-6 flex items-center space-x-2" href="/">
             <span className="font-bold">NextChat</span>
@@ -69,18 +71,16 @@ export function NavBar() {
                 <DropdownMenuItem className="flex-col items-start">
                   <div className="text-sm font-medium">{user.email}</div>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>
-                  Logout
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild>
-              <Link href="/login">Login</Link>
+              <Link href="/signin">Sign in</Link>
             </Button>
           )}
         </div>
       </div>
     </header>
   )
-} 
+}

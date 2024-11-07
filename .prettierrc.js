@@ -9,4 +9,4 @@ module.exports = {
   arrowParens: 'avoid', // 箭头函数单参数时不使用括号
   endOfLine: 'lf', // 换行符使用 lf
   plugins: ['prettier-plugin-tailwindcss'], // 添加 Tailwind 插件
-} 
+}
