@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +8,7 @@ import { Icons } from '@/components/ui/icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
+import { signupFormSchema } from '@/lib/validations/auth'
 import {
   Form,
   FormControl,
@@ -17,29 +17,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-
-const formSchema = z
-  .object({
-    email: z.string().email({
-      message: 'Please enter a valid email address',
-    }),
-    password: z.string().min(6, {
-      message: 'Password must be at least 6 characters',
-    }),
-    confirmPassword: z.string(),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+import { signUpAction } from '@/app/actions/auth'
+import { useSearchParams } from 'next/dist/client/components/navigation'
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
-  const router = useRouter()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof signupFormSchema>>({
+    resolver: zodResolver(signupFormSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -47,21 +33,17 @@ export function SignUpForm() {
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
+  if (error) {
+    form.setError('root', { message: error })
+  }
+
+  async function onSubmit(values: z.infer<typeof signupFormSchema>) {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-      })
-
-      if (error) {
-        form.setError('root', { message: error.message })
-        return
-      }
-
-      router.push('/chat')
+      await signUpAction(values)
     } catch (error) {
       console.error('Sign up error:', error)
     } finally {

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,44 +16,35 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-
-const formSchema = z.object({
-  email: z.string().email({
-    message: 'Please enter a valid email address',
-  }),
-  password: z.string().min(6, {
-    message: 'Password must be at least 6 characters',
-  }),
-})
+import { signinFormSchema } from '@/lib/validations/auth'
+import { useSearchParams } from 'next/dist/client/components/navigation'
+import { signInAction } from '@/app/actions/auth'
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
-  const router = useRouter()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof signinFormSchema>>({
+    resolver: zodResolver(signinFormSchema),
     defaultValues: {
       email: '',
       password: '',
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error) {
+      form.setError('root', { message: error })
+    }
+  }, [searchParams, form])
+
+  const onSubmit = async (values: z.infer<typeof signinFormSchema>) => {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      })
-
-      if (error) {
-        form.setError('root', { message: error.message })
-        return
-      }
-
-      router.push('/chat')
+      await signInAction(values)
     } catch (error) {
       console.error('Sign in error:', error)
     } finally {
