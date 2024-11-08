@@ -12,10 +12,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useRouter } from 'next/navigation'
 
 export function NavBar() {
   const [user, setUser] = useState<User | null>(null)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     // 获取当前用户
@@ -37,7 +39,7 @@ export function NavBar() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    window.location.href = '/'
+    router.push('/signin')
   }
 
   return (

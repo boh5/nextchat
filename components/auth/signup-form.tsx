@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,7 @@ const formSchema = z
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,7 +61,7 @@ export function SignUpForm() {
         return
       }
 
-      window.location.href = '/chat'
+      router.push('/chat')
     } catch (error) {
       console.error('Sign up error:', error)
     } finally {
@@ -136,7 +138,7 @@ export function SignUpForm() {
           supabase.auth.signInWithOAuth({
             provider: 'github',
             options: {
-              redirectTo: `${window.location.origin}/auth/callback`,
+              redirectTo: `${window.location.origin}/api/auth/callback`,
             },
           })
         }
