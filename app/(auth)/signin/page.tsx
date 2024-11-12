@@ -1,16 +1,7 @@
 import { SignInForm } from '@/components/auth/signin-form'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export default async function SignInPage() {
-  const supabase = await createClient()
-  const session = await supabase.auth.getSession()
-
-  if (session.data.session) {
-    redirect('/chat')
-  }
-
   return (
     <div className="container mx-auto flex h-screen w-screen flex-col items-center justify-center">
       <div className="flex w-full flex-col justify-center space-y-6 sm:w-[350px]">

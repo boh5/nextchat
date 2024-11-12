@@ -2,9 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
-import { useEffect, useState } from 'react'
-import type { User } from '@supabase/supabase-js'
+import { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,35 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
-
+import { User } from 'next-auth'
+import { signOut, useSession } from 'next-auth/react'
 export function NavBar() {
-  const [user, setUser] = useState<User | null>(null)
-  const supabase = createClient()
-  const router = useRouter()
-
-  useEffect(() => {
-    // 获取当前用户
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user)
-    })
-
-    // 监听认证状态变化
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [supabase.auth])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/signin')
-  }
+  const { data: session } = useSession()
+  const [user, setUser] = useState<User | null>(session?.user ?? null)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -64,7 +38,7 @@ export function NavBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.user_metadata.avatar_url} alt={user.email ?? ''} />
+                    <AvatarImage src={user.image ?? ''} alt={user.email ?? ''} />
                     <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -73,12 +47,12 @@ export function NavBar() {
                 <DropdownMenuItem className="flex-col items-start">
                   <div className="text-sm font-medium">{user.email}</div>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOut()}>Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild>
-              <Link href="/signin">Sign in</Link>
+              <Link href="/signin">Sign In</Link>
             </Button>
           )}
         </div>
