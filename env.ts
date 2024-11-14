@@ -7,7 +7,7 @@ export const env = createEnv({
     AUTH_DRIZZLE_URL: z.string().url(),
     AUTH_GITHUB_ID: z.string(),
     AUTH_GITHUB_SECRET: z.string(),
-    DB_FILE_NAME: z.string(),
+    POSTGRES_URL: z.string().url(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
@@ -17,7 +17,7 @@ export const env = createEnv({
     AUTH_DRIZZLE_URL: process.env.AUTH_DRIZZLE_URL,
     AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
     AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
-    DB_FILE_NAME: process.env.DB_FILE_NAME,
+    POSTGRES_URL: process.env.POSTGRES_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
 })

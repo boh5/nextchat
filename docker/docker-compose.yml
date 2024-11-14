@@ -1,13 +1,13 @@
 version: '3.8'
+name: dbs
 
 services:
   postgres:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - '127.0.0.1:5432:5432'
     volumes:
@@ -28,8 +28,8 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - '127.0.0.1:5050:80'
     volumes:
@@ -67,7 +67,22 @@ networks:
 volumes:
   postgres_data:
     name: postgres_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/postgres
   pgadmin_data:
     name: pgadmin_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/pgadmin
   redis_data:
     name: redis_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/redis

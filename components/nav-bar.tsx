@@ -10,11 +10,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { User } from 'next-auth'
 import { signOut, useSession } from 'next-auth/react'
 export function NavBar() {
   const { data: session } = useSession()
-  const [user, setUser] = useState<User | null>(session?.user ?? null)
+
+  const user = session?.user
+
+  console.log('session', session)
+  console.log('user', user)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">

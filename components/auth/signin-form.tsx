@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Icons } from '@/components/ui/icons'
-import { signIn } from '@/lib/auth'
+import { signIn } from '@/lib/auth/auth'
 import { headers } from 'next/headers'
 
 export async function SignInForm() {
