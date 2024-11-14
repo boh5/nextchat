@@ -25,3 +25,6 @@ coverage
 
 # shadcn-ui
 components/ui/
+
+# docker
+docker

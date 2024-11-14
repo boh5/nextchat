@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +14,6 @@ export function NavBar() {
   const { data: session } = useSession()
 
   const user = session?.user
-
-  console.log('session', session)
-  console.log('user', user)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
