@@ -14,7 +14,6 @@ build
 .temp
 
 # 编译输出
-lib
 es
 coverage
 
@@ -28,3 +27,6 @@ components/ui/
 
 # docker
 docker
+
+# migrations
+lib/db/migrations/
