@@ -9,23 +9,17 @@ export async function SignInForm() {
     headersList.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   return (
-    <div className="grid gap-6">
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
-        </div>
-      </div>
+    <div className="flex flex-col items-center space-y-4">
       <Button
+        size="lg"
         variant="outline"
+        className="w-full"
         onClick={async () => {
           'use server'
           await signIn('github', { redirectTo: `${origin}/chat` })
         }}
       >
-        <Icons.gitHub className="mr-2 h-4 w-4" />
+        <Icons.gitHub className="mr-2 h-5 w-5" />
         Continue with GitHub
       </Button>
     </div>
