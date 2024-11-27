@@ -1,12 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Icons } from '@/components/ui/icons'
+import { env } from '@/env'
 import { signIn } from '@/lib/auth/auth'
-import { headers } from 'next/headers'
 
 export async function SignInForm() {
-  const headersList = await headers()
-  const origin =
-    headersList.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const origin = env.NEXT_PUBLIC_APP_URL
 
   return (
     <div className="flex flex-col items-center space-y-4">

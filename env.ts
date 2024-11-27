@@ -10,7 +10,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_APP_URL: z.string().url(),
   },
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
