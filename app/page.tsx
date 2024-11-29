@@ -79,7 +79,7 @@ export default function Home() {
               <span className="text-xl font-bold">NextChat</span>
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              © {new Date().getFullYear()} NextChat. All rights reserved.
+              &copy; {new Date().getFullYear()} NextChat. All rights reserved.
             </div>
           </div>
         </div>

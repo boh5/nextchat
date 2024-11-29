@@ -30,7 +30,7 @@ export async function NavBar() {
             <UserButton user={user} />
           ) : (
             <Button asChild>
-              <Link href="/signin">Sign In</Link>
+              <Link href="/signin">SignIn</Link>
             </Button>
           )}
         </div>

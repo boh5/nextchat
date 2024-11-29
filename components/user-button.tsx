@@ -30,9 +30,7 @@ export function UserButton({ user }: UserButtonProps) {
         <DropdownMenuItem className="flex-col items-start">
           <div className="text-sm font-medium">{user.email}</div>
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => signOut({ callbackUrl: '/signin' })}
-        >
+        <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/signin' })}>
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
