@@ -89,7 +89,7 @@ function ChatList({ type }: { type: 'private' | 'group' }) {
       {filteredChats.map(chat => (
         <div
           key={chat.id}
-          className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
+          className="relative flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
         >
           <Avatar>
             <AvatarImage src={chat.avatar} alt={chat.name} />
@@ -105,7 +105,7 @@ function ChatList({ type }: { type: 'private' | 'group' }) {
             <p className="truncate text-sm text-muted-foreground">{chat.lastMessage}</p>
           </div>
           {chat.unread && (
-            <div className="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
               {chat.unread}
             </div>
           )}

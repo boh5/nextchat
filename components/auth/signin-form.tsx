@@ -14,7 +14,7 @@ export async function SignInForm() {
         className="w-full"
         onClick={async () => {
           'use server'
-          await signIn('github', { redirectTo: `${origin}/friends` })
+          await signIn('github', { redirectTo: `${origin}/chat` })
         }}
       >
         <Icons.gitHub className="mr-2 h-5 w-5" />

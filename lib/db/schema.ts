@@ -77,3 +77,48 @@ export const authenticators = pgTable(
     }),
   })
 )
+
+export const friends = pgTable('friend', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  friendId: text('friendId')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status', { enum: ['pending', 'accepted', 'blocked'] }).notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+})
+
+export const groups = pgTable('group', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text('name').notNull(),
+  description: text('description'),
+  avatar: text('avatar'),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+  creatorId: text('creator_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+})
+
+export const groupMembers = pgTable('group_member', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  groupId: text('group_id')
+    .notNull()
+    .references(() => groups.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  role: text('role', { enum: ['admin', 'member'] })
+    .notNull()
+    .default('member'),
+  joinedAt: timestamp('joined_at', { mode: 'date' }).notNull().defaultNow(),
+})

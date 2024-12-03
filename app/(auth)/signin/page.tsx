@@ -1,8 +1,16 @@
 import { SignInForm } from '@/components/auth/signin-form'
 import { Icons } from '@/components/ui/icons'
 import { AuroraBackground } from '@/components/ui/aurora-background'
+import { auth } from '@/lib/auth/auth'
+import { redirect } from 'next/navigation'
 
 export default async function SignInPage() {
+  const session = await auth()
+
+  if (session?.user) {
+    redirect('/chat')
+  }
+
   return (
     <div className="container relative min-h-[calc(100vh-65px)] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col overflow-hidden text-white dark:border-r lg:flex">
