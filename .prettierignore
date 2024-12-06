@@ -30,3 +30,6 @@ docker
 
 # migrations
 lib/db/migrations/
+
+# pnpm-lock.yaml
+pnpm-lock.yaml

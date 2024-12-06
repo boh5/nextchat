@@ -11,11 +11,11 @@ import { getFriendsList, getGroupsList, type ChatTarget } from '@/app/actions/ch
 
 interface ChatListProps {
   type: 'private' | 'group'
-  onSelectChat: (targetId: string) => void
-  selectedId?: string
+  onSelectChat: (chat: ChatTarget) => void
+  selectedChatId?: string
 }
 
-export function ChatList({ type, onSelectChat, selectedId }: ChatListProps) {
+export function ChatList({ type, onSelectChat, selectedChatId }: ChatListProps) {
   const lastItemRef = useRef<HTMLDivElement>(null)
   const { ref, entry } = useIntersection({
     root: lastItemRef.current,
@@ -55,9 +55,9 @@ export function ChatList({ type, onSelectChat, selectedId }: ChatListProps) {
             ref={index === items.length - 1 ? ref : undefined}
             className={cn(
               'flex cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors hover:bg-accent',
-              selectedId === item.id && 'bg-accent'
+              selectedChatId === item.id && 'bg-accent'
             )}
-            onClick={() => onSelectChat(item.id)}
+            onClick={() => onSelectChat(item)}
           >
             <Avatar>
               <AvatarImage src={item.avatar || undefined} alt={item.name} />

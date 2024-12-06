@@ -10,12 +10,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { FriendManagement } from '@/components/friend/friend-management'
 import { GroupManagement } from '@/components/group/group-management'
 import { ChatList } from './chat-list'
-import { Chat } from '@/types/chat'
+import { type ChatTarget } from '@/app/actions/chat'
 
 export function ChatSidebar() {
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
+  const [selectedChat, setSelectedChat] = useState<ChatTarget | null>(null)
 
-  const handleSelectChat = (chat: Chat) => {
+  const handleSelectChat = (chat: ChatTarget) => {
     setSelectedChat(chat)
     // TODO: Implement chat selection logic
   }

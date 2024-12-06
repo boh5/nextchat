@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db/drizzle'
 import { friends, messages, users, groups, groupMembers } from '@/lib/db/schema'
-import { and, desc, eq, gt, or } from 'drizzle-orm'
+import { and, desc, eq, gt, or, not, sql } from 'drizzle-orm'
 import { auth } from '@/lib/auth/auth'
 import { revalidatePath } from 'next/cache'
 
@@ -83,7 +83,7 @@ export async function getFriendsList(cursor?: string): Promise<ListResponse> {
     items: formattedItems,
     nextCursor:
       hasMore && items[items.length - 1].lastMessage
-        ? items[items.length - 1].lastMessage.createdAt.toISOString()
+        ? items[items.length - 1].lastMessage!.createdAt.toISOString()
         : undefined,
   }
 }
@@ -143,7 +143,7 @@ export async function getGroupsList(cursor?: string): Promise<ListResponse> {
     items: formattedItems,
     nextCursor:
       hasMore && items[items.length - 1].lastMessage
-        ? items[items.length - 1].lastMessage.createdAt.toISOString()
+        ? items[items.length - 1].lastMessage!.createdAt.toISOString()
         : undefined,
   }
 }
@@ -211,7 +211,7 @@ export async function sendMessage(data: {
       .update(friends)
       .set({
         lastMessageId: message.id,
-        unreadCount: db.raw('unread_count + 1'),
+        unreadCount: sql`${friends.unreadCount} + 1`,
         updatedAt: new Date(),
       })
       .where(
@@ -235,9 +235,9 @@ export async function sendMessage(data: {
     await db
       .update(groupMembers)
       .set({
-        unreadCount: db.raw('unread_count + 1'),
+        unreadCount: sql`${groupMembers.unreadCount} + 1`,
       })
-      .where(and(eq(groupMembers.groupId, data.receiverId), eq(groupMembers.userId, userId).not()))
+      .where(and(eq(groupMembers.groupId, data.receiverId), not(eq(groupMembers.userId, userId))))
   }
 
   revalidatePath('/chat')

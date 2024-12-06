@@ -18,7 +18,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   authenticators: many(authenticators),
   friends: many(friends),
   groupMembers: many(groupMembers),
-  chatParticipants: many(chatParticipants),
   messages: many(messages),
 }))
 
