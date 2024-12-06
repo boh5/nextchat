@@ -13,6 +13,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.9.1(react-hook-form@7.53.2(react@19.0.0-rc-02c0e824-20241028))
+      '@mantine/hooks':
+        specifier: ^7.14.3
+        version: 7.14.3(react@19.0.0-rc-02c0e824-20241028)
       '@radix-ui/react-avatar':
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@19.0.0-rc-02c0e824-20241028(react@19.0.0-rc-02c0e824-20241028))(react@19.0.0-rc-02c0e824-20241028)
@@ -46,6 +49,9 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: ^0.11.1
         version: 0.11.1(typescript@5.6.3)(zod@3.23.8)
+      '@tanstack/react-query':
+        specifier: ^5.62.2
+        version: 5.62.2(react@19.0.0-rc-02c0e824-20241028)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -1207,6 +1213,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@mantine/hooks@7.14.3':
+    resolution:
+      {
+        integrity: sha512-cU3R9b8GLs6aCvpsVC56ZOOJCUIoDqX3RcLWkcfpA5a47LjWa/rzegP4YWfNW6/E9vodPJT4AEbYXVffYlyNwA==,
+      }
+    peerDependencies:
+      react: ^18.x || ^19.x
+
   '@neon-rs/load@0.0.4':
     resolution:
       {
@@ -1875,6 +1889,20 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@tanstack/query-core@5.62.2':
+    resolution:
+      {
+        integrity: sha512-LcwVcC5qpsDpHcqlXUUL5o9SaOBwhNkGeV+B06s0GBoyBr8FqXPuXT29XzYXR36lchhnerp6XO+CWc84/vh7Zg==,
+      }
+
+  '@tanstack/react-query@5.62.2':
+    resolution:
+      {
+        integrity: sha512-fkTpKKfwTJtVPKVR+ag7YqFgG/7TRVVPzduPAUF9zRCiiA8Wu305u+KJl8rCrh98Qce77vzIakvtUyzWLtaPGA==,
+      }
+    peerDependencies:
+      react: ^18 || ^19
 
   '@types/better-sqlite3@7.6.11':
     resolution:
@@ -5588,6 +5616,10 @@ snapshots:
   '@libsql/win32-x64-msvc@0.4.7':
     optional: true
 
+  '@mantine/hooks@7.14.3(react@19.0.0-rc-02c0e824-20241028)':
+    dependencies:
+      react: 19.0.0-rc-02c0e824-20241028
+
   '@neon-rs/load@0.0.4':
     optional: true
 
@@ -6020,6 +6052,13 @@ snapshots:
       zod: 3.23.8
     optionalDependencies:
       typescript: 5.6.3
+
+  '@tanstack/query-core@5.62.2': {}
+
+  '@tanstack/react-query@5.62.2(react@19.0.0-rc-02c0e824-20241028)':
+    dependencies:
+      '@tanstack/query-core': 5.62.2
+      react: 19.0.0-rc-02c0e824-20241028
 
   '@types/better-sqlite3@7.6.11':
     dependencies:

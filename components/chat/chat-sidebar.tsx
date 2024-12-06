@@ -1,124 +1,25 @@
+'use client'
+
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UsersIcon, UserIcon, UserPlusIcon, UserPlus, Users, User } from 'lucide-react'
+import { UsersIcon, UserIcon, UserPlusIcon, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { FriendManagement } from '@/components/friend/friend-management'
 import { GroupManagement } from '@/components/group/group-management'
-import { userAvatars } from '@/public/placeholder'
-import { groupAvatars } from '@/public/placeholder'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-
-interface ChatItem {
-  id: string
-  name: string
-  avatar: string
-  lastMessage: string
-  timestamp: string
-  unread?: number
-  type: 'private' | 'group'
-}
-
-const mockChats: ChatItem[] = [
-  {
-    id: '1',
-    name: 'Alex Johnson',
-    avatar: userAvatars.user1,
-    lastMessage: "Hey, how's it going?",
-    timestamp: '2m ago',
-    unread: 2,
-    type: 'private',
-  },
-  {
-    id: '2',
-    name: 'Tech Team',
-    avatar: groupAvatars.group1,
-    lastMessage: 'Meeting starts in 10 minutes',
-    timestamp: '5m ago',
-    unread: 3,
-    type: 'group',
-  },
-  {
-    id: '3',
-    name: 'Bella Smith',
-    avatar: userAvatars.user2,
-    lastMessage: 'The meeting is scheduled for tomorrow',
-    timestamp: '1h ago',
-    type: 'private',
-  },
-  {
-    id: '4',
-    name: 'Project Alpha',
-    avatar: groupAvatars.group2,
-    lastMessage: 'New milestone achieved!',
-    timestamp: '1h ago',
-    type: 'group',
-  },
-  {
-    id: '5',
-    name: 'Chris Davis',
-    avatar: userAvatars.user3,
-    lastMessage: 'Thanks for your help!',
-    timestamp: '2h ago',
-    type: 'private',
-  },
-  {
-    id: '6',
-    name: 'Design Team',
-    avatar: groupAvatars.group3,
-    lastMessage: 'New design review needed',
-    timestamp: '3h ago',
-    type: 'group',
-  },
-  {
-    id: '7',
-    name: 'Diana Wilson',
-    avatar: userAvatars.user4,
-    lastMessage: "Let's catch up soon",
-    timestamp: '1d ago',
-    type: 'private',
-  },
-]
-
-function ChatList({ type }: { type: 'private' | 'group' }) {
-  const filteredChats = mockChats.filter(chat => chat.type === type)
-
-  return (
-    <div className="divide-y divide-border">
-      {filteredChats.map(chat => (
-        <div
-          key={chat.id}
-          className="relative flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-accent"
-        >
-          <Avatar>
-            <AvatarImage src={chat.avatar} alt={chat.name} />
-            <AvatarFallback>
-              {chat.type === 'group' ? <Users className="h-6 w-6" /> : <User className="h-6 w-6" />}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between">
-              <span className="truncate font-medium">{chat.name}</span>
-              <span className="shrink-0 text-xs text-muted-foreground">{chat.timestamp}</span>
-            </div>
-            <p className="truncate text-sm text-muted-foreground">{chat.lastMessage}</p>
-          </div>
-          {chat.unread && (
-            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              {chat.unread}
-            </div>
-          )}
-        </div>
-      ))}
-      {filteredChats.length === 0 && (
-        <div className="py-4 text-center text-sm text-muted-foreground">No messages yet</div>
-      )}
-    </div>
-  )
-}
+import { ChatList } from './chat-list'
+import { Chat } from '@/types/chat'
 
 export function ChatSidebar() {
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
+
+  const handleSelectChat = (chat: Chat) => {
+    setSelectedChat(chat)
+    // TODO: Implement chat selection logic
+  }
+
   return (
     <div className="flex h-full w-[320px] flex-col border-r bg-background">
       <div className="space-y-4 border-b p-4">
@@ -171,10 +72,18 @@ export function ChatSidebar() {
         </TabsList>
         <ScrollArea className="flex-1">
           <TabsContent value="private" className="m-0 mt-0">
-            <ChatList type="private" />
+            <ChatList
+              type="private"
+              onSelectChat={handleSelectChat}
+              selectedChatId={selectedChat?.id}
+            />
           </TabsContent>
           <TabsContent value="group" className="m-0 mt-0">
-            <ChatList type="group" />
+            <ChatList
+              type="group"
+              onSelectChat={handleSelectChat}
+              selectedChatId={selectedChat?.id}
+            />
           </TabsContent>
         </ScrollArea>
       </Tabs>
