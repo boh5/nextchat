@@ -1,14 +1,15 @@
 # NextChat
 
-基于 Next.js 的在线社交聊天应用，提供类似微信的即时通讯功能。
+基于 Next.js 15 (App Router) 的在线社交聊天应用。
 
 ## 技术栈
 
 - **框架**: Next.js 15 (App Router)
 - **UI**: shadcn/ui + Tailwind CSS
 - **后端服务**:
-  - 数据库: PostgreSQL (Supabase)
-  - 认证: Auth.js (NextAuth)
+  - 数据库: PostgreSQL
+  - 认证: Auth.js
+  - API: tRPC
   - 实时通信: WebSocket (Socket.IO)
 - **ORM**: Drizzle
 - **缓存**: Redis
@@ -17,10 +18,9 @@
 ## 主要功能
 
 - 用户系统
-
   - 用户认证 (Auth.js)
-    - 邮箱/密码登录
     - OAuth 社交登录 (Google, GitHub)
+    - 邮箱/密码登录
     - 会话管理与安全
   - 个人资料管理
     - 头像上传
@@ -28,7 +28,6 @@
   - 在线状态显示
 
 - 社交功能
-
   - 好友系统
     - 添加/删除好友
     - 好友列表管理
@@ -66,8 +65,6 @@ nextchat/
 │   ├── (auth)/              # 认证相关路由
 │   ├── (chat)/              # 聊天相关路由
 │   ├── api/                 # API 路由
-│   ├── fonts/               # 字体文件
-│   ├── globals.css          # 全局样式
 │   ├── layout.tsx           # 根布局
 │   └── page.tsx             # 首页
 │
@@ -76,16 +73,72 @@ nextchat/
 │   ├── chat/                # 聊天相关组件
 │   ├── friend/              # 好友管理组件
 │   ├── group/               # 群组管理组件
-│   ├── ui/                  # UI 基础组件 (shadcn/ui)
-│   ├── nav-bar.tsx         # 导航栏组件
-│   └── user-button.tsx     # 用户按钮组件
+│   ├── providers/           # 应用提供者组件
+│   └── ui/                  # UI 基础组件 (shadcn/ui)
 │
 ├── lib/                     # 工具函数和配置
-├── public/                  # 静态资源
+│   ├── auth/               # 认证相关配置
+│   ├── db/                 # 数据库相关
+│   └── trpc/               # tRPC 相关
 ├── hooks/                   # React Hooks
-├── docker/                  # Docker 配置
-├── env.ts                   # 环境变量类型
+├── server/                  # 服务器端代码
+│   ├── routers/            # tRPC 路由
+│   └── trpc.ts             # tRPC 配置
 ├── drizzle.config.ts       # Drizzle ORM 配置
 ├── tailwind.config.ts      # Tailwind CSS 配置
 └── next.config.js          # Next.js 配置
 ```
+
+## 开发指南
+
+### 环境要求
+
+- Node.js 18+
+- PostgreSQL 14+
+- pnpm
+
+### 环境变量
+
+创建 `.env` 文件并配置以下环境变量：
+
+```bash
+# 数据库
+DATABASE_URL=
+
+# Auth.js
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=
+
+# OAuth 提供商
+GITHUB_ID=
+GITHUB_SECRET=
+GOOGLE_ID=
+GOOGLE_SECRET=
+```
+
+### 安装
+
+```bash
+# 安装依赖
+pnpm install
+
+# 初始化数据库
+pnpm db:push
+
+# 启动开发服务器
+pnpm dev
+```
+
+### 数据库迁移
+
+```bash
+# 生成迁移文件
+pnpm db:generate
+
+# 应用迁移
+pnpm db:push
+```
+
+## 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情

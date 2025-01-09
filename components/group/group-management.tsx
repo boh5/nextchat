@@ -1,13 +1,5 @@
 'use client';
 
-import {
-  createGroup,
-  deleteGroup,
-  getUserGroups,
-  joinGroup,
-  leaveGroup,
-  updateGroup,
-} from '@/app/actions/group';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,11 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { trpc } from '@/lib/trpc/client';
 import { Settings, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface Group {
   id: string;
@@ -33,44 +25,73 @@ interface Group {
   createdAt: Date;
   updatedAt: Date;
   creatorId: string;
+  lastMessageId: string | null;
 }
 
-interface GroupWithRole {
+type GroupWithRole = {
   group: Group;
   role: 'admin' | 'member';
-}
+};
 
 function EditGroupDialog({
   group,
   onClose,
-}: { group: Group; onClose: () => void }) {
+}: {
+  group: Group;
+  onClose: () => void;
+}) {
   const [name, setName] = useState(group.name);
   const [description, setDescription] = useState(group.description || '');
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const { toast } = useToast();
+  const utils = trpc.useUtils();
 
-  const handleSubmit = async () => {
-    try {
-      await updateGroup(group.id, { name, description });
+  const updateGroupMutation = trpc.group.updateGroup.useMutation({
+    onSuccess: () => {
       toast({
         description: 'Group updated successfully',
       });
       setIsOpen(false);
       onClose();
-      // 触发父组件重新加载群组列表
-      window.dispatchEvent(new CustomEvent('refreshGroups'));
-    } catch {
+      utils.group.getUserGroups.invalidate();
+    },
+    onError: () => {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to update group',
       });
-    }
+    },
+  });
+
+  const deleteGroupMutation = trpc.group.deleteGroup.useMutation({
+    onSuccess: () => {
+      toast({
+        description: 'Group deleted successfully',
+      });
+      setIsOpen(false);
+      onClose();
+      utils.group.getUserGroups.invalidate();
+    },
+    onError: () => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete group',
+      });
+    },
+  });
+
+  const handleSubmit = () => {
+    updateGroupMutation.mutate({
+      groupId: group.id,
+      data: { name, description },
+    });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (deleteConfirmName !== group.name) {
       toast({
         variant: 'destructive',
@@ -80,21 +101,7 @@ function EditGroupDialog({
       return;
     }
 
-    try {
-      await deleteGroup(group.id);
-      toast({
-        description: 'Group deleted successfully',
-      });
-      setIsOpen(false);
-      onClose();
-      window.dispatchEvent(new CustomEvent('refreshGroups'));
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to delete group',
-      });
-    }
+    deleteGroupMutation.mutate({ groupId: group.id });
   };
 
   return (
@@ -123,8 +130,12 @@ function EditGroupDialog({
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <Button className="w-full" onClick={handleSubmit}>
-            Update Group
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={updateGroupMutation.isPending}
+          >
+            {updateGroupMutation.isPending ? 'Updating...' : 'Update Group'}
           </Button>
 
           <div className="relative">
@@ -154,8 +165,11 @@ function EditGroupDialog({
                   variant="destructive"
                   className="flex-1"
                   onClick={handleDelete}
+                  disabled={deleteGroupMutation.isPending}
                 >
-                  Confirm Delete
+                  {deleteGroupMutation.isPending
+                    ? 'Deleting...'
+                    : 'Confirm Delete'}
                 </Button>
                 <Button
                   variant="outline"
@@ -189,24 +203,29 @@ function CreateGroupDialog() {
   const [description, setDescription] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const utils = trpc.useUtils();
 
-  const handleSubmit = async () => {
-    try {
-      await createGroup({ name, description });
+  const createGroupMutation = trpc.group.createGroup.useMutation({
+    onSuccess: () => {
       toast({
         description: 'Group created successfully',
       });
       setIsOpen(false);
       setName('');
       setDescription('');
-      window.dispatchEvent(new CustomEvent('refreshGroups'));
-    } catch {
+      utils.group.getUserGroups.invalidate();
+    },
+    onError: () => {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to create group',
       });
-    }
+    },
+  });
+
+  const handleSubmit = () => {
+    createGroupMutation.mutate({ name, description });
   };
 
   return (
@@ -236,8 +255,12 @@ function CreateGroupDialog() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <Button className="w-full" onClick={handleSubmit}>
-            Create Group
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={createGroupMutation.isPending}
+          >
+            {createGroupMutation.isPending ? 'Creating...' : 'Create Group'}
           </Button>
         </div>
       </DialogContent>
@@ -247,159 +270,94 @@ function CreateGroupDialog() {
 
 export function GroupManagement() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [userGroups, setUserGroups] = useState<GroupWithRole[]>([]);
   const { toast } = useToast();
+  const utils = trpc.useUtils();
 
-  useEffect(() => {
-    loadUserGroups();
-    window.addEventListener('refreshGroups', loadUserGroups);
-    return () => {
-      window.removeEventListener('refreshGroups', loadUserGroups);
-    };
-  }, []);
+  const { data: userGroups = [], isLoading } =
+    trpc.group.getUserGroups.useQuery();
 
-  const loadUserGroups = async () => {
-    try {
-      const groups = await getUserGroups();
-      setUserGroups(groups);
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to load groups',
-      });
-    }
-  };
-
-  const _handleJoinGroup = async (groupId: string) => {
-    try {
-      await joinGroup(groupId);
-      toast({
-        description: 'Joined group successfully',
-      });
-      loadUserGroups();
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to join group',
-      });
-    }
-  };
-
-  const handleLeaveGroup = async (groupId: string) => {
-    try {
-      await leaveGroup(groupId);
+  const leaveGroupMutation = trpc.group.leaveGroup.useMutation({
+    onSuccess: () => {
       toast({
         description: 'Left group successfully',
       });
-      loadUserGroups();
-    } catch (error) {
+      utils.group.getUserGroups.invalidate();
+    },
+    onError: () => {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to leave group',
+        description: 'Failed to leave group',
       });
-    }
+    },
+  });
+
+  const handleLeaveGroup = (groupId: string) => {
+    leaveGroupMutation.mutate({ groupId });
   };
 
-  const _handleDeleteGroup = async (groupId: string) => {
-    try {
-      await deleteGroup(groupId);
-      toast({
-        description: 'Group deleted successfully',
-      });
-      loadUserGroups();
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to delete group',
-      });
-    }
-  };
+  const filteredGroups = (userGroups as GroupWithRole[]).filter((group) =>
+    group.group.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <Tabs defaultValue="mygroups" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="mygroups">My Groups</TabsTrigger>
-        <TabsTrigger value="discover">Discover</TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="mygroups" className="mt-4">
+    <div className="space-y-4 p-4">
+      <CreateGroupDialog />
+      <Input
+        placeholder="Search groups..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="space-y-4">
-          <CreateGroupDialog />
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-4">
-              {userGroups.map(({ group, role }) => (
-                <div
-                  key={group.id}
-                  className="flex items-center justify-between rounded-md border p-2 hover:bg-accent"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      {group.avatar && (
-                        <AvatarImage src={group.avatar} alt={group.name} />
-                      )}
-                      <AvatarFallback>
-                        <Users className="h-6 w-6" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{group.name}</div>
+          {isLoading ? (
+            <div className="text-center">Loading...</div>
+          ) : filteredGroups.length === 0 ? (
+            <div className="text-center text-muted-foreground">
+              No groups found
+            </div>
+          ) : (
+            filteredGroups.map(({ group, role }) => (
+              <div
+                key={group.id}
+                className="flex items-center justify-between space-x-4 rounded-lg border p-4"
+              >
+                <div className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarImage src={group.avatar || undefined} />
+                    <AvatarFallback>
+                      <Users className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{group.name}</div>
+                    {group.description && (
                       <div className="text-muted-foreground text-sm">
                         {group.description}
                       </div>
-                      <div className="text-muted-foreground text-xs">
-                        Role: {role}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    {role === 'admin' ? (
-                      <EditGroupDialog
-                        group={group}
-                        onClose={() => loadUserGroups()}
-                      />
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleLeaveGroup(group.id)}
-                      >
-                        Leave
-                      </Button>
                     )}
                   </div>
                 </div>
-              ))}
-              {userGroups.length === 0 && (
-                <div className="py-8 text-center text-muted-foreground">
-                  You have not joined any groups yet
+                <div className="flex items-center space-x-2">
+                  {role === 'admin' && (
+                    <EditGroupDialog group={group} onClose={() => {}} />
+                  )}
+                  {role === 'member' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleLeaveGroup(group.id)}
+                      disabled={leaveGroupMutation.isPending}
+                    >
+                      {leaveGroupMutation.isPending ? 'Leaving...' : 'Leave'}
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
-          </ScrollArea>
+              </div>
+            ))
+          )}
         </div>
-      </TabsContent>
-
-      <TabsContent value="discover" className="mt-4 space-y-4">
-        <Input
-          placeholder="Search groups..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <ScrollArea className="h-[400px]">
-          <div className="space-y-4">
-            {/* 这里需要添加发现新群组的功能 */}
-            <div className="py-8 text-center text-muted-foreground">
-              Coming soon...
-            </div>
-          </div>
-        </ScrollArea>
-      </TabsContent>
-    </Tabs>
+      </ScrollArea>
+    </div>
   );
 }

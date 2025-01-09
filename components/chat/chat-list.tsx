@@ -1,17 +1,23 @@
 'use client';
 
-import {
-  type ChatTarget,
-  getFriendsList,
-  getGroupsList,
-} from '@/app/actions/chat';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { trpc } from '@/lib/trpc/client';
 import { cn } from '@/lib/utils';
 import { useIntersection } from '@mantine/hooks';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { User, Users } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+
+export interface ChatTarget {
+  id: string;
+  name: string;
+  avatar: string | null;
+  lastMessage?: {
+    content: string;
+    timestamp: string;
+  };
+  unreadCount: number;
+}
 
 interface ChatListProps {
   type: 'private' | 'group';
@@ -31,15 +37,21 @@ export function ChatList({
   });
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteQuery({
-      queryKey: [type === 'private' ? 'friends' : 'groups'],
-      queryFn: ({ pageParam }) =>
-        type === 'private'
-          ? getFriendsList(pageParam as string)
-          : getGroupsList(pageParam as string),
-      initialPageParam: '',
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    });
+    type === 'private'
+      ? trpc.chat.getFriendsList.useInfiniteQuery(
+          {},
+          {
+            getNextPageParam: (lastPage: { nextCursor?: string }) =>
+              lastPage.nextCursor,
+          }
+        )
+      : trpc.chat.getGroupsList.useInfiniteQuery(
+          {},
+          {
+            getNextPageParam: (lastPage: { nextCursor?: string }) =>
+              lastPage.nextCursor,
+          }
+        );
 
   useEffect(() => {
     if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -59,12 +71,14 @@ export function ChatList({
     );
   }
 
-  const items = data.pages.flatMap((page) => page.items);
+  const items = data.pages.flatMap(
+    (page: { items: ChatTarget[] }) => page.items
+  );
 
   return (
     <ScrollArea className="h-screen">
       <div className="space-y-2 p-4">
-        {items.map((item: ChatTarget, index) => (
+        {items.map((item: ChatTarget, index: number) => (
           <button
             type="button"
             key={item.id}

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChatTarget } from '@/app/actions/chat';
+import type { ChatTarget } from '@/components/chat/chat-list';
 import { FriendManagement } from '@/components/friend/friend-management';
 import { GroupManagement } from '@/components/group/group-management';
 import { Button } from '@/components/ui/button';
