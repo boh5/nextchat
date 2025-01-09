@@ -1,25 +1,28 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { auth } from '@/lib/auth/auth'
-import { UserButton } from './user-button'
-import { Icons } from './ui/icons'
+import { Button } from '@/components/ui/button';
+import { auth } from '@/lib/auth/auth';
+import Link from 'next/link';
+import { Icons } from './ui/icons';
+import { UserButton } from './user-button';
 
 export async function NavBar() {
-  const session = await auth()
-  const user = session?.user
+  const session = await auth();
+  const user = session?.user;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 items-center justify-between">
         <div className="mr-4 flex">
-          <Link className="mr-6 flex items-center space-x-2 text-primary" href="/">
+          <Link
+            className="mr-6 flex items-center space-x-2 text-primary"
+            href="/"
+          >
             <Icons.logo className="h-6 w-6" />
             <span className="font-bold">NextChat</span>
           </Link>
           <nav className="flex items-center space-x-6">
             <Link
               href="/chat"
-              className="text-sm font-medium transition-colors hover:text-foreground/80"
+              className="font-medium text-sm transition-colors hover:text-foreground/80"
             >
               Chat
             </Link>
@@ -36,5 +39,5 @@ export async function NavBar() {
         </div>
       </div>
     </header>
-  )
+  );
 }

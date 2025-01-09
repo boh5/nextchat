@@ -1,24 +1,30 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UsersIcon, UserIcon, UserPlusIcon, UserPlus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { FriendManagement } from '@/components/friend/friend-management'
-import { GroupManagement } from '@/components/group/group-management'
-import { ChatList } from './chat-list'
-import { type ChatTarget } from '@/app/actions/chat'
+import type { ChatTarget } from '@/app/actions/chat';
+import { FriendManagement } from '@/components/friend/friend-management';
+import { GroupManagement } from '@/components/group/group-management';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserIcon, UserPlus, UserPlusIcon, UsersIcon } from 'lucide-react';
+import { useState } from 'react';
+import { ChatList } from './chat-list';
 
 export function ChatSidebar() {
-  const [selectedChat, setSelectedChat] = useState<ChatTarget | null>(null)
+  const [selectedChat, setSelectedChat] = useState<ChatTarget | null>(null);
 
   const handleSelectChat = (chat: ChatTarget) => {
-    setSelectedChat(chat)
+    setSelectedChat(chat);
     // TODO: Implement chat selection logic
-  }
+  };
 
   return (
     <div className="flex h-full w-[320px] flex-col border-r bg-background">
@@ -61,11 +67,17 @@ export function ChatSidebar() {
       </div>
       <Tabs defaultValue="private" className="flex flex-1 flex-col">
         <TabsList className="grid h-12 w-full grid-cols-2 p-0">
-          <TabsTrigger value="private" className="rounded-none data-[state=active]:bg-accent">
+          <TabsTrigger
+            value="private"
+            className="rounded-none data-[state=active]:bg-accent"
+          >
             <UserIcon className="mr-2 h-4 w-4" />
             Private
           </TabsTrigger>
-          <TabsTrigger value="group" className="rounded-none data-[state=active]:bg-accent">
+          <TabsTrigger
+            value="group"
+            className="rounded-none data-[state=active]:bg-accent"
+          >
             <UsersIcon className="mr-2 h-4 w-4" />
             Groups
           </TabsTrigger>
@@ -88,5 +100,5 @@ export function ChatSidebar() {
         </ScrollArea>
       </Tabs>
     </div>
-  )
+  );
 }

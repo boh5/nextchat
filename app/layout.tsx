@@ -1,10 +1,12 @@
-import { Providers } from './providers'
-import './globals.css'
-import { SessionProvider } from 'next-auth/react'
-import { Toaster } from '@/components/ui/toaster'
-import { NavBar } from '@/components/nav-bar'
+import { Providers } from './providers';
+import './globals.css';
+import { NavBar } from '@/components/nav-bar';
+import { Toaster } from '@/components/ui/toaster';
+import { SessionProvider } from 'next-auth/react';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -17,5 +19,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Providers>
       </body>
     </html>
-  )
+  );
 }

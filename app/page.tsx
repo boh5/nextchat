@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { MessageCircle, Settings, Shield } from 'lucide-react'
+import { MessageCircle, Settings, Shield } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -8,10 +8,10 @@ export default function Home() {
       <section className="bg-gradient-to-b from-[hsl(142.1,30%,95%)] to-white dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col items-center text-center">
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-gray-900 dark:text-white md:text-6xl">
+            <h1 className="mb-6 font-bold text-5xl text-gray-900 tracking-tight md:text-6xl dark:text-white">
               Next<span className="text-primary">Chat</span>
             </h1>
-            <p className="mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
+            <p className="mb-8 max-w-2xl text-gray-600 text-xl dark:text-gray-300">
               Experience seamless communication with our modern chat platform
             </p>
             <div className="flex gap-4">
@@ -35,7 +35,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mb-12 text-center font-bold text-3xl text-gray-900 dark:text-white">
             Why Choose NextChat?
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
@@ -49,8 +49,10 @@ export default function Home() {
                     <feature.icon className="h-6 w-6 text-primary" />
                   </div>
                 </div>
-                <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <h3 className="mb-2 font-semibold text-xl">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -60,8 +62,10 @@ export default function Home() {
       {/* CTA Section */}
       <section className="bg-primary py-20 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6 text-3xl font-bold">Ready to Start?</h2>
-          <p className="mb-8 text-lg">Join us and experience better communication</p>
+          <h2 className="mb-6 font-bold text-3xl">Ready to Start?</h2>
+          <p className="mb-8 text-lg">
+            Join us and experience better communication
+          </p>
           <Link
             href="/chat"
             className="rounded-full bg-white px-8 py-3 text-primary transition hover:bg-gray-100"
@@ -76,22 +80,23 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">NextChat</span>
+              <span className="font-bold text-xl">NextChat</span>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-gray-600 text-sm dark:text-gray-400">
               &copy; {new Date().getFullYear()} NextChat. All rights reserved.
             </div>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
 const features = [
   {
     title: 'Real-time Chat',
-    description: 'Experience instant message delivery with smooth chat interactions',
+    description:
+      'Experience instant message delivery with smooth chat interactions',
     icon: MessageCircle,
   },
   {
@@ -104,4 +109,4 @@ const features = [
     description: 'Advanced security measures to protect your privacy',
     icon: Shield,
   },
-]
+];

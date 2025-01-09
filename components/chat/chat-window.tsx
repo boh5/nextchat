@@ -1,22 +1,22 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Menu, Send } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { userAvatars } from '@/public/placeholder'
-import { ChatSidebar } from './chat-sidebar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { userAvatars } from '@/public/placeholder';
+import { Menu, Send } from 'lucide-react';
+import { ChatSidebar } from './chat-sidebar';
 
 interface Message {
-  id: string
-  content: string
+  id: string;
+  content: string;
   sender: {
-    id: string
-    name: string
-    avatar: string
-  }
-  timestamp: string
-  isSent: boolean
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  timestamp: string;
+  isSent: boolean;
 }
 
 const mockMessages: Message[] = [
@@ -53,7 +53,7 @@ const mockMessages: Message[] = [
     timestamp: '2:32 PM',
     isSent: false,
   },
-]
+];
 
 export function ChatWindow() {
   return (
@@ -67,7 +67,7 @@ export function ChatWindow() {
           </Avatar>
           <div>
             <div className="font-semibold">Alex Johnson</div>
-            <div className="text-sm text-muted-foreground">Online</div>
+            <div className="text-muted-foreground text-sm">Online</div>
           </div>
         </div>
         <Sheet>
@@ -85,24 +85,35 @@ export function ChatWindow() {
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {mockMessages.map(message => (
+          {mockMessages.map((message) => (
             <div
               key={message.id}
               className={`flex items-start gap-2 ${message.isSent ? 'flex-row-reverse' : ''}`}
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={message.sender.avatar} alt={message.sender.name} />
-                <AvatarFallback>{message.sender.name.slice(0, 2)}</AvatarFallback>
+                <AvatarImage
+                  src={message.sender.avatar}
+                  alt={message.sender.name}
+                />
+                <AvatarFallback>
+                  {message.sender.name.slice(0, 2)}
+                </AvatarFallback>
               </Avatar>
-              <div className={`flex flex-col ${message.isSent ? 'items-end' : 'items-start'}`}>
+              <div
+                className={`flex flex-col ${message.isSent ? 'items-end' : 'items-start'}`}
+              >
                 <div
                   className={`rounded-lg px-4 py-2 ${
-                    message.isSent ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    message.isSent
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
                   }`}
                 >
                   {message.content}
                 </div>
-                <span className="mt-1 text-xs text-muted-foreground">{message.timestamp}</span>
+                <span className="mt-1 text-muted-foreground text-xs">
+                  {message.timestamp}
+                </span>
               </div>
             </div>
           ))}
@@ -119,5 +130,5 @@ export function ChatWindow() {
         </form>
       </div>
     </div>
-  )
+  );
 }

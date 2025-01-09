@@ -1,7 +1,7 @@
-import NextAuth from 'next-auth'
-import { DrizzleAdapter } from '@auth/drizzle-adapter'
-import { db } from '@/lib/db/drizzle'
-import authConfig from './auth.config'
+import { db } from '@/lib/db/drizzle';
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import NextAuth from 'next-auth';
+import authConfig from './auth.config';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db),
@@ -13,13 +13,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         // User is available during sign-in
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
+      return token;
     },
     session({ session, token }) {
-      session.user.id = token.id as string
-      return session
+      session.user.id = token.id as string;
+      return session;
     },
   },
-})
+});

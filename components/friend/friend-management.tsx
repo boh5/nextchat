@@ -1,124 +1,127 @@
-'use client'
+'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Check, MessageSquare, X, User as UserIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import {
+  acceptFriendRequest,
   getFriendList,
   getPendingFriendRequests,
-  sendFriendRequest,
-  acceptFriendRequest,
   rejectFriendRequest,
-} from '@/app/actions/friend'
-import { useToast } from '@/hooks/use-toast'
+  sendFriendRequest,
+} from '@/app/actions/friend';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { Check, MessageSquare, User as UserIcon, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface FriendRequest {
-  id: string
-  userId: string
-  friendId: string
-  status: string
-  createdAt: Date
+  id: string;
+  userId: string;
+  friendId: string;
+  status: string;
+  createdAt: Date;
   user?: {
-    name: string | null
-    email: string | null
-    image: string | null
-  }
+    name: string | null;
+    email: string | null;
+    image: string | null;
+  };
   friend?: {
-    name: string | null
-    email: string | null
-    image: string | null
-  }
+    name: string | null;
+    email: string | null;
+    image: string | null;
+  };
 }
 
 export function FriendManagement() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [friends, setFriends] = useState<FriendRequest[]>([])
-  const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([])
-  const { toast } = useToast()
+  const [searchTerm, setSearchTerm] = useState('');
+  const [friends, setFriends] = useState<FriendRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<FriendRequest[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
-    loadFriends()
-    loadPendingRequests()
-  }, [])
+    loadFriends();
+    loadPendingRequests();
+  }, []);
 
   const loadFriends = async () => {
     try {
-      const friendsList = await getFriendList()
-      setFriends(friendsList)
+      const friendsList = await getFriendList();
+      setFriends(friendsList);
     } catch {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to load friends',
-      })
+      });
     }
-  }
+  };
 
   const loadPendingRequests = async () => {
     try {
-      const requests = await getPendingFriendRequests()
-      setPendingRequests(requests)
+      const requests = await getPendingFriendRequests();
+      setPendingRequests(requests);
     } catch {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to load friend requests',
-      })
+      });
     }
-  }
+  };
 
-  const handleSendRequest = async (friendId: string) => {
+  const _handleSendRequest = async (friendId: string) => {
     try {
-      await sendFriendRequest(friendId)
+      await sendFriendRequest(friendId);
       toast({
         description: 'Friend request sent successfully',
-      })
-      loadFriends()
+      });
+      loadFriends();
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to send friend request',
-      })
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to send friend request',
+      });
     }
-  }
+  };
 
   const handleAcceptRequest = async (requestId: string) => {
     try {
-      await acceptFriendRequest(requestId)
+      await acceptFriendRequest(requestId);
       toast({
         description: 'Friend request accepted',
-      })
-      loadPendingRequests()
-      loadFriends()
+      });
+      loadPendingRequests();
+      loadFriends();
     } catch {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to accept friend request',
-      })
+      });
     }
-  }
+  };
 
   const handleRejectRequest = async (requestId: string) => {
     try {
-      await rejectFriendRequest(requestId)
+      await rejectFriendRequest(requestId);
       toast({
         description: 'Friend request rejected',
-      })
-      loadPendingRequests()
+      });
+      loadPendingRequests();
     } catch {
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to reject friend request',
-      })
+      });
     }
-  }
+  };
 
   return (
     <Tabs defaultValue="search" className="w-full">
@@ -131,18 +134,21 @@ export function FriendManagement() {
         <Input
           placeholder="Search by name or email..."
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <ScrollArea className="h-[400px]">
           <div className="space-y-2">
-            {friends.map(friend => (
+            {friends.map((friend) => (
               <div
                 key={friend.id}
                 className="flex w-full items-center gap-4 rounded-md p-3 hover:bg-accent"
               >
                 <Avatar className="h-10 w-10">
                   {friend.friend?.image && (
-                    <AvatarImage src={friend.friend.image} alt={friend.friend?.name || ''} />
+                    <AvatarImage
+                      src={friend.friend.image}
+                      alt={friend.friend?.name || ''}
+                    />
                   )}
                   <AvatarFallback>
                     <UserIcon className="h-6 w-6" />
@@ -150,9 +156,11 @@ export function FriendManagement() {
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">
-                    {friend.friend?.name || friend.friend?.email || friend.friendId}
+                    {friend.friend?.name ||
+                      friend.friend?.email ||
+                      friend.friendId}
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm">
                     {friend.status === 'accepted' ? (
                       <span className="text-green-500">Friend</span>
                     ) : (
@@ -174,14 +182,17 @@ export function FriendManagement() {
       <TabsContent value="requests" className="mt-4">
         <ScrollArea className="h-[400px]">
           <div className="space-y-4">
-            {pendingRequests.map(request => (
+            {pendingRequests.map((request) => (
               <div
                 key={request.id}
                 className="flex w-full items-center gap-4 rounded-md border p-3"
               >
                 <Avatar className="h-10 w-10">
                   {request.user?.image && (
-                    <AvatarImage src={request.user.image} alt={request.user?.name || ''} />
+                    <AvatarImage
+                      src={request.user.image}
+                      alt={request.user?.name || ''}
+                    />
                   )}
                   <AvatarFallback>
                     <UserIcon className="h-6 w-6" />
@@ -189,9 +200,11 @@ export function FriendManagement() {
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">
-                    {request.user?.name || request.user?.email || request.userId}
+                    {request.user?.name ||
+                      request.user?.email ||
+                      request.userId}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {new Date(request.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -216,11 +229,13 @@ export function FriendManagement() {
               </div>
             ))}
             {pendingRequests.length === 0 && (
-              <div className="py-8 text-center text-muted-foreground">No friend requests</div>
+              <div className="py-8 text-center text-muted-foreground">
+                No friend requests
+              </div>
             )}
           </div>
         </ScrollArea>
       </TabsContent>
     </Tabs>
-  )
+  );
 }

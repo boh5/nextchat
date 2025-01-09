@@ -1,13 +1,13 @@
-import { ChatSidebar } from '@/components/chat/chat-sidebar'
-import { ChatWindow } from '@/components/chat/chat-window'
-import { auth } from '@/lib/auth/auth'
-import { redirect } from 'next/navigation'
+import { ChatSidebar } from '@/components/chat/chat-sidebar';
+import { ChatWindow } from '@/components/chat/chat-window';
+import { auth } from '@/lib/auth/auth';
+import { redirect } from 'next/navigation';
 
 export default async function ChatPage() {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user) {
-    redirect('/signin')
+    redirect('/signin');
   }
 
   return (
@@ -19,5 +19,5 @@ export default async function ChatPage() {
         <ChatWindow />
       </div>
     </main>
-  )
+  );
 }

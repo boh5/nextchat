@@ -2,8 +2,8 @@
 // https://www.dicebear.com/playground
 
 export const generatePlaceholderAvatar = (seed: string) => {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=65c9ff,b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`
-}
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=65c9ff,b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+};
 
 // For user avatars
 export const userAvatars = {
@@ -12,7 +12,7 @@ export const userAvatars = {
   user3: generatePlaceholderAvatar('chris'),
   user4: generatePlaceholderAvatar('diana'),
   user5: generatePlaceholderAvatar('ethan'),
-}
+};
 
 // For group avatars
 export const groupAvatars = {
@@ -21,4 +21,4 @@ export const groupAvatars = {
   group3: generatePlaceholderAvatar('design-team'),
   group4: generatePlaceholderAvatar('marketing'),
   group5: generatePlaceholderAvatar('general'),
-}
+};
