@@ -8,8 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { User } from 'next-auth';
-import { signOut } from 'next-auth/react';
+import { authClient } from '@/lib/auth/auth-client';
+import type { User } from 'better-auth';
+import { redirect } from 'next/navigation';
 
 interface UserButtonProps {
   user: User;
@@ -32,7 +33,13 @@ export function UserButton({ user }: UserButtonProps) {
         <DropdownMenuItem className="flex-col items-start">
           <div className="font-medium text-sm">{user.email}</div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/signin' })}>
+        <DropdownMenuItem
+          onClick={() =>
+            authClient.signOut({
+              fetchOptions: { onSuccess: () => redirect('/signin') },
+            })
+          }
+        >
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

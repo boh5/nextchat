@@ -1,25 +1,20 @@
-import { db } from '@/lib/db/drizzle';
-import { DrizzleAdapter } from '@auth/drizzle-adapter';
-import NextAuth from 'next-auth';
-import authConfig from './auth.config';
+import { env } from '@/env';
+import { db } from '@/lib/db/drizzle'; // your drizzle instance
+import { schema } from '@/lib/db/schema/better-auth';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { nextCookies } from 'better-auth/next-js';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: DrizzleAdapter(db),
-  session: {
-    strategy: 'jwt',
-  },
-  ...authConfig,
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        // User is available during sign-in
-        token.id = user.id;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      session.user.id = token.id as string;
-      return session;
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: 'sqlite', // or "mysql", "sqlite"
+    schema: { ...schema },
+  }),
+  plugins: [nextCookies()],
+  socialProviders: {
+    github: {
+      clientId: env.AUTH_GITHUB_ID,
+      clientSecret: env.AUTH_GITHUB_SECRET,
     },
   },
 });

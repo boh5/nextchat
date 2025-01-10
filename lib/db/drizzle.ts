@@ -1,8 +1,8 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { env } from '@/env';
+import { drizzle } from 'drizzle-orm/libsql';
 
-// TODO: 改用 t3-env
-// biome-ignore lint/style/noNonNullAssertion: 后面改用 t3-env
-const pool = postgres(process.env.DATABASE_URL!, { max: 1 });
-
-export const db = drizzle(pool);
+export const db = drizzle({
+  connection: {
+    url: env.DATABASE_URL,
+  },
+});

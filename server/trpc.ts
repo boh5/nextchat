@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth/auth';
 import { TRPCError, initTRPC } from '@trpc/server';
+import { headers } from 'next/headers';
 import superjson from 'superjson';
 
 const t = initTRPC.context().create({
@@ -7,7 +8,9 @@ const t = initTRPC.context().create({
 });
 
 const isAuthed = t.middleware(async (opts) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session?.user?.id) {
     throw new TRPCError({

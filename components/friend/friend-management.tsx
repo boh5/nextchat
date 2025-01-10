@@ -93,6 +93,91 @@ export function FriendManagement() {
     rejectRequestMutation.mutate({ requestId });
   };
 
+  const renderSearchContent = () => {
+    if (!debouncedSearch.length) {
+      return friends.map((friend) => (
+        <div
+          key={friend.id}
+          className="flex w-full items-center gap-4 rounded-md p-3 hover:bg-accent"
+        >
+          <Avatar className="h-10 w-10">
+            {friend.friend?.image && (
+              <AvatarImage
+                src={friend.friend.image}
+                alt={friend.friend?.name || ''}
+              />
+            )}
+            <AvatarFallback>
+              <UserIcon className="h-6 w-6" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-medium">
+              {friend.friend?.name || friend.friend?.email || friend.friendId}
+            </div>
+            <div className="text-muted-foreground text-sm">
+              {friend.status === 'accepted' ? (
+                <span className="text-green-500">Friend</span>
+              ) : (
+                <span className="text-yellow-500">Pending</span>
+              )}
+            </div>
+          </div>
+          <div className="ml-2 flex shrink-0 gap-2">
+            <Button size="sm" variant="ghost">
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ));
+    }
+
+    if (isSearching) {
+      return (
+        <div className="py-8 text-center text-muted-foreground">
+          Searching...
+        </div>
+      );
+    }
+
+    if (searchResults.length === 0) {
+      return (
+        <div className="py-8 text-center text-muted-foreground">
+          No users found
+        </div>
+      );
+    }
+
+    return searchResults.map((user) => (
+      <div
+        key={user.id}
+        className="flex w-full items-center gap-4 rounded-md p-3 hover:bg-accent"
+      >
+        <Avatar className="h-10 w-10">
+          {user.image && <AvatarImage src={user.image} alt={user.name || ''} />}
+          <AvatarFallback>
+            <UserIcon className="h-6 w-6" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-medium">
+            {user.name || user.email || user.id}
+          </div>
+        </div>
+        <div className="ml-2 flex shrink-0 gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleSendRequest(user.id)}
+            disabled={sendRequestMutation.isPending}
+          >
+            <UserPlus className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <Tabs defaultValue="search" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -107,90 +192,7 @@ export function FriendManagement() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <ScrollArea className="h-[400px]">
-          <div className="space-y-2">
-            {debouncedSearch.length > 0 ? (
-              <>
-                {isSearching ? (
-                  <div className="py-8 text-center text-muted-foreground">
-                    Searching...
-                  </div>
-                ) : searchResults.length > 0 ? (
-                  searchResults.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex w-full items-center gap-4 rounded-md p-3 hover:bg-accent"
-                    >
-                      <Avatar className="h-10 w-10">
-                        {user.image && (
-                          <AvatarImage src={user.image} alt={user.name || ''} />
-                        )}
-                        <AvatarFallback>
-                          <UserIcon className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate font-medium">
-                          {user.name || user.email || user.id}
-                        </div>
-                      </div>
-                      <div className="ml-2 flex shrink-0 gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleSendRequest(user.id)}
-                          disabled={sendRequestMutation.isPending}
-                        >
-                          <UserPlus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="py-8 text-center text-muted-foreground">
-                    No users found
-                  </div>
-                )}
-              </>
-            ) : (
-              friends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className="flex w-full items-center gap-4 rounded-md p-3 hover:bg-accent"
-                >
-                  <Avatar className="h-10 w-10">
-                    {friend.friend?.image && (
-                      <AvatarImage
-                        src={friend.friend.image}
-                        alt={friend.friend?.name || ''}
-                      />
-                    )}
-                    <AvatarFallback>
-                      <UserIcon className="h-6 w-6" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate font-medium">
-                      {friend.friend?.name ||
-                        friend.friend?.email ||
-                        friend.friendId}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {friend.status === 'accepted' ? (
-                        <span className="text-green-500">Friend</span>
-                      ) : (
-                        <span className="text-yellow-500">Pending</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="ml-2 flex shrink-0 gap-2">
-                    <Button size="sm" variant="ghost">
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <div className="space-y-2">{renderSearchContent()}</div>
         </ScrollArea>
       </TabsContent>
 

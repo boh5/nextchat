@@ -36,22 +36,24 @@ export function ChatList({
     threshold: 1,
   });
 
+  const friendsQuery = trpc.chat.getFriendsList.useInfiniteQuery(
+    {},
+    {
+      getNextPageParam: (lastPage: { nextCursor?: string }) =>
+        lastPage.nextCursor,
+    }
+  );
+
+  const groupsQuery = trpc.chat.getGroupsList.useInfiniteQuery(
+    {},
+    {
+      getNextPageParam: (lastPage: { nextCursor?: string }) =>
+        lastPage.nextCursor,
+    }
+  );
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    type === 'private'
-      ? trpc.chat.getFriendsList.useInfiniteQuery(
-          {},
-          {
-            getNextPageParam: (lastPage: { nextCursor?: string }) =>
-              lastPage.nextCursor,
-          }
-        )
-      : trpc.chat.getGroupsList.useInfiniteQuery(
-          {},
-          {
-            getNextPageParam: (lastPage: { nextCursor?: string }) =>
-              lastPage.nextCursor,
-          }
-        );
+    type === 'private' ? friendsQuery : groupsQuery;
 
   useEffect(() => {
     if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {

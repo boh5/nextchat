@@ -310,14 +310,20 @@ export function GroupManagement() {
       />
       <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center">Loading...</div>
-          ) : filteredGroups.length === 0 ? (
-            <div className="text-center text-muted-foreground">
-              No groups found
-            </div>
-          ) : (
-            filteredGroups.map(({ group, role }) => (
+          {(() => {
+            if (isLoading) {
+              return <div className="text-center">Loading...</div>;
+            }
+
+            if (filteredGroups.length === 0) {
+              return (
+                <div className="text-center text-muted-foreground">
+                  No groups found
+                </div>
+              );
+            }
+
+            return filteredGroups.map(({ group, role }) => (
               <div
                 key={group.id}
                 className="flex items-center justify-between space-x-4 rounded-lg border p-4"
@@ -340,7 +346,12 @@ export function GroupManagement() {
                 </div>
                 <div className="flex items-center space-x-2">
                   {role === 'admin' && (
-                    <EditGroupDialog group={group} onClose={() => {}} />
+                    <EditGroupDialog
+                      group={group}
+                      onClose={() => {
+                        /*TODO: later*/
+                      }}
+                    />
                   )}
                   {role === 'member' && (
                     <Button
@@ -354,8 +365,8 @@ export function GroupManagement() {
                   )}
                 </div>
               </div>
-            ))
-          )}
+            ));
+          })()}
         </div>
       </ScrollArea>
     </div>

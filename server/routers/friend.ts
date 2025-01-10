@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/drizzle';
-import { friends, users } from '@/lib/db/schema';
+import { friend, user } from '@/lib/db/schema';
 import { TRPCError } from '@trpc/server';
-import { and, eq, ilike, notInArray, or } from 'drizzle-orm';
+import { and, eq, ilike, notInArray, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc';
 
@@ -14,17 +14,11 @@ export const friendRouter = router({
       // Check if friend request already exists
       const existingRequest = await db
         .select()
-        .from(friends)
+        .from(friend)
         .where(
           or(
-            and(
-              eq(friends.userId, userId),
-              eq(friends.friendId, input.friendId)
-            ),
-            and(
-              eq(friends.userId, input.friendId),
-              eq(friends.friendId, userId)
-            )
+            and(eq(friend.userId, userId), eq(friend.friendId, input.friendId)),
+            and(eq(friend.userId, input.friendId), eq(friend.friendId, userId))
           )
         );
 
@@ -35,7 +29,7 @@ export const friendRouter = router({
         });
       }
 
-      await db.insert(friends).values({
+      await db.insert(friend).values({
         userId,
         friendId: input.friendId,
         status: 'pending',
@@ -51,12 +45,12 @@ export const friendRouter = router({
 
       const request = await db
         .select()
-        .from(friends)
+        .from(friend)
         .where(
           and(
-            eq(friends.id, input.requestId),
-            eq(friends.friendId, userId),
-            eq(friends.status, 'pending')
+            eq(friend.id, input.requestId),
+            eq(friend.friendId, userId),
+            eq(friend.status, 'pending')
           )
         );
 
@@ -68,9 +62,9 @@ export const friendRouter = router({
       }
 
       await db
-        .update(friends)
-        .set({ status: 'accepted', updatedAt: new Date() })
-        .where(eq(friends.id, input.requestId));
+        .update(friend)
+        .set({ status: 'accepted', updatedAt: sql`CURRENT_TIMESTAMP` })
+        .where(eq(friend.id, input.requestId));
 
       return { success: true };
     }),
@@ -81,12 +75,12 @@ export const friendRouter = router({
       const userId = ctx.user.id;
 
       await db
-        .delete(friends)
+        .delete(friend)
         .where(
           and(
-            eq(friends.id, input.requestId),
-            eq(friends.friendId, userId),
-            eq(friends.status, 'pending')
+            eq(friend.id, input.requestId),
+            eq(friend.friendId, userId),
+            eq(friend.status, 'pending')
           )
         );
 
@@ -99,17 +93,11 @@ export const friendRouter = router({
       const userId = ctx.user.id;
 
       await db
-        .delete(friends)
+        .delete(friend)
         .where(
           or(
-            and(
-              eq(friends.userId, userId),
-              eq(friends.friendId, input.friendId)
-            ),
-            and(
-              eq(friends.userId, input.friendId),
-              eq(friends.friendId, userId)
-            )
+            and(eq(friend.userId, userId), eq(friend.friendId, input.friendId)),
+            and(eq(friend.userId, input.friendId), eq(friend.friendId, userId))
           )
         );
 
@@ -121,21 +109,21 @@ export const friendRouter = router({
 
     const friendsList = await db
       .select({
-        id: friends.id,
-        status: friends.status,
-        createdAt: friends.createdAt,
-        userId: friends.userId,
-        friendId: friends.friendId,
+        id: friend.id,
+        status: friend.status,
+        createdAt: friend.createdAt,
+        userId: friend.userId,
+        friendId: friend.friendId,
         friend: {
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          image: users.image,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
         },
       })
-      .from(friends)
-      .innerJoin(users, eq(friends.friendId, users.id))
-      .where(eq(friends.userId, userId));
+      .from(friend)
+      .innerJoin(user, eq(friend.friendId, user.id))
+      .where(eq(friend.userId, userId));
 
     return friendsList;
   }),
@@ -145,21 +133,21 @@ export const friendRouter = router({
 
     const pendingRequests = await db
       .select({
-        id: friends.id,
-        status: friends.status,
-        createdAt: friends.createdAt,
-        userId: friends.userId,
-        friendId: friends.friendId,
+        id: friend.id,
+        status: friend.status,
+        createdAt: friend.createdAt,
+        userId: friend.userId,
+        friendId: friend.friendId,
         user: {
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          image: users.image,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
         },
       })
-      .from(friends)
-      .innerJoin(users, eq(friends.userId, users.id))
-      .where(and(eq(friends.friendId, userId), eq(friends.status, 'pending')));
+      .from(friend)
+      .innerJoin(user, eq(friend.userId, user.id))
+      .where(and(eq(friend.friendId, userId), eq(friend.status, 'pending')));
 
     return pendingRequests;
   }),
@@ -176,30 +164,30 @@ export const friendRouter = router({
       // Get existing friend relationships
       const existingFriends = await db
         .select({
-          friendId: friends.friendId,
+          friendId: friend.friendId,
         })
-        .from(friends)
-        .where(or(eq(friends.userId, userId), eq(friends.friendId, userId)));
+        .from(friend)
+        .where(or(eq(friend.userId, userId), eq(friend.friendId, userId)));
 
       const friendIds = existingFriends.map((f) => f.friendId);
 
       // Search for users
       const searchResults = await db
         .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          image: users.image,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
         })
-        .from(users)
+        .from(user)
         .where(
           and(
             or(
-              ilike(users.name || '', `%${input.query}%`),
-              ilike(users.email || '', `%${input.query}%`)
+              ilike(user.name || '', `%${input.query}%`),
+              ilike(user.email || '', `%${input.query}%`)
             ),
             // Exclude current user and existing friends
-            and(notInArray(users.id, [userId]), notInArray(users.id, friendIds))
+            and(notInArray(user.id, [userId]), notInArray(user.id, friendIds))
           )
         )
         .limit(10);

@@ -1,14 +1,9 @@
 import { ChatSidebar } from '@/components/chat/chat-sidebar';
 import { ChatWindow } from '@/components/chat/chat-window';
-import { auth } from '@/lib/auth/auth';
-import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/auth/auth-guard';
 
 export default async function ChatPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect('/signin');
-  }
+  await requireAuth();
 
   return (
     <main className="flex h-[calc(100vh-3.5rem)]">

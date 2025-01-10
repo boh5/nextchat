@@ -1,11 +1,5 @@
 import { db } from '@/lib/db/drizzle';
-import {
-  friends,
-  groupMembers,
-  groups,
-  messages,
-  users,
-} from '@/lib/db/schema';
+import { friend, group, groupMember, message, user } from '@/lib/db/schema';
 import { and, desc, eq, gt, not, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc';
@@ -19,39 +13,42 @@ export const chatRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const limit = 20;
-      const { user } = ctx;
+      const { user: currentUser } = ctx;
 
       const friendsList = await db
         .select({
           friend: {
-            id: users.id,
-            name: users.name,
-            avatar: users.image,
+            id: user.id,
+            name: user.name,
+            avatar: user.image,
           },
           lastMessage: {
-            content: messages.content,
-            createdAt: messages.createdAt,
+            content: message.content,
+            createdAt: message.createdAt,
           },
-          unreadCount: friends.unreadCount,
+          unreadCount: friend.unreadCount,
         })
-        .from(friends)
+        .from(friend)
         .innerJoin(
-          users,
+          user,
           or(
-            and(eq(friends.friendId, users.id), eq(friends.userId, user.id)),
-            and(eq(friends.userId, users.id), eq(friends.friendId, user.id))
+            and(
+              eq(friend.friendId, user.id),
+              eq(friend.userId, currentUser.id)
+            ),
+            and(eq(friend.userId, user.id), eq(friend.friendId, currentUser.id))
           )
         )
-        .leftJoin(messages, eq(messages.id, friends.lastMessageId))
+        .leftJoin(message, eq(message.id, friend.lastMessageId))
         .where(
           and(
-            eq(friends.status, 'accepted'),
+            eq(friend.status, 'accepted'),
             input.cursor
-              ? gt(messages.createdAt, new Date(input.cursor))
+              ? gt(message.createdAt, Number(input.cursor))
               : undefined
           )
         )
-        .orderBy(desc(messages.createdAt))
+        .orderBy(desc(message.createdAt))
         .limit(limit + 1);
 
       const hasMore = friendsList.length > limit;
@@ -64,17 +61,20 @@ export const chatRouter = router({
         lastMessage: item.lastMessage
           ? {
               content: item.lastMessage.content,
-              timestamp: item.lastMessage.createdAt.toISOString(),
+              timestamp: new Date(
+                Number(item.lastMessage.createdAt) * 1000
+              ).toISOString(),
             }
           : undefined,
         unreadCount: item.unreadCount,
       }));
 
+      const lastItem = items.at(-1);
       return {
         items: formattedItems,
         nextCursor:
-          hasMore && items.at(-1)?.lastMessage
-            ? items.at(-1)?.lastMessage?.createdAt.toISOString()
+          hasMore && lastItem?.lastMessage
+            ? lastItem.lastMessage.createdAt.toString()
             : undefined,
       };
     }),
@@ -87,33 +87,33 @@ export const chatRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const limit = 20;
-      const { user } = ctx;
+      const { user: currentUser } = ctx;
 
       const groupsList = await db
         .select({
           group: {
-            id: groups.id,
-            name: groups.name,
-            avatar: groups.avatar,
+            id: group.id,
+            name: group.name,
+            avatar: group.avatar,
           },
           lastMessage: {
-            content: messages.content,
-            createdAt: messages.createdAt,
+            content: message.content,
+            createdAt: message.createdAt,
           },
-          unreadCount: groupMembers.unreadCount,
+          unreadCount: groupMember.unreadCount,
         })
-        .from(groupMembers)
-        .innerJoin(groups, eq(groups.id, groupMembers.groupId))
-        .leftJoin(messages, eq(messages.id, groups.lastMessageId))
+        .from(groupMember)
+        .innerJoin(group, eq(group.id, groupMember.groupId))
+        .leftJoin(message, eq(message.id, group.lastMessageId))
         .where(
           and(
-            eq(groupMembers.userId, user.id),
+            eq(groupMember.userId, currentUser.id),
             input.cursor
-              ? gt(messages.createdAt, new Date(input.cursor))
+              ? gt(message.createdAt, Number(input.cursor))
               : undefined
           )
         )
-        .orderBy(desc(messages.createdAt))
+        .orderBy(desc(message.createdAt))
         .limit(limit + 1);
 
       const hasMore = groupsList.length > limit;
@@ -126,17 +126,20 @@ export const chatRouter = router({
         lastMessage: item.lastMessage
           ? {
               content: item.lastMessage.content,
-              timestamp: item.lastMessage.createdAt.toISOString(),
+              timestamp: new Date(
+                Number(item.lastMessage.createdAt) * 1000
+              ).toISOString(),
             }
           : undefined,
         unreadCount: item.unreadCount,
       }));
 
+      const lastItem = items.at(-1);
       return {
         items: formattedItems,
         nextCursor:
-          hasMore && items.at(-1)?.lastMessage
-            ? items.at(-1)?.lastMessage?.createdAt.toISOString()
+          hasMore && lastItem?.lastMessage
+            ? lastItem.lastMessage.createdAt.toString()
             : undefined,
       };
     }),
@@ -150,25 +153,25 @@ export const chatRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { user } = ctx;
+      const { user: currentUser } = ctx;
 
       // 验证权限
       if (input.type === 'private') {
         // 检查是否是好友
         const isFriend = await db
           .select()
-          .from(friends)
+          .from(friend)
           .where(
             and(
-              eq(friends.status, 'accepted'),
+              eq(friend.status, 'accepted'),
               or(
                 and(
-                  eq(friends.userId, user.id),
-                  eq(friends.friendId, input.receiverId)
+                  eq(friend.userId, currentUser.id),
+                  eq(friend.friendId, input.receiverId)
                 ),
                 and(
-                  eq(friends.userId, input.receiverId),
-                  eq(friends.friendId, user.id)
+                  eq(friend.userId, input.receiverId),
+                  eq(friend.friendId, currentUser.id)
                 )
               )
             )
@@ -182,11 +185,11 @@ export const chatRouter = router({
         // 检查是否是群组成员
         const isMember = await db
           .select()
-          .from(groupMembers)
+          .from(groupMember)
           .where(
             and(
-              eq(groupMembers.groupId, input.receiverId),
-              eq(groupMembers.userId, user.id)
+              eq(groupMember.groupId, input.receiverId),
+              eq(groupMember.userId, currentUser.id)
             )
           )
           .limit(1);
@@ -197,11 +200,11 @@ export const chatRouter = router({
       }
 
       // 发送消息
-      const [message] = await db
-        .insert(messages)
+      const [newMessage] = await db
+        .insert(message)
         .values({
           content: input.content,
-          senderId: user.id,
+          senderId: currentUser.id,
           receiverId: input.receiverId,
           type: input.type,
         })
@@ -211,82 +214,42 @@ export const chatRouter = router({
       if (input.type === 'private') {
         // 更新好友关系表
         await db
-          .update(friends)
+          .update(friend)
           .set({
-            lastMessageId: message.id,
-            unreadCount: sql`${friends.unreadCount} + 1`,
-            updatedAt: new Date(),
+            lastMessageId: newMessage.id,
+            unreadCount: sql`${friend.unreadCount} + 1`,
+            updatedAt: sql`CURRENT_TIMESTAMP`,
           })
           .where(
             and(
-              eq(friends.status, 'accepted'),
-              eq(friends.userId, input.receiverId),
-              eq(friends.friendId, user.id)
+              eq(friend.status, 'accepted'),
+              eq(friend.userId, input.receiverId),
+              eq(friend.friendId, currentUser.id)
             )
           );
       } else {
         // 更新群组表和成员未读状态
         await db
-          .update(groups)
+          .update(group)
           .set({
-            lastMessageId: message.id,
-            updatedAt: new Date(),
+            lastMessageId: newMessage.id,
+            updatedAt: sql`CURRENT_TIMESTAMP`,
           })
-          .where(eq(groups.id, input.receiverId));
+          .where(eq(group.id, input.receiverId));
 
         await db
-          .update(groupMembers)
+          .update(groupMember)
           .set({
-            unreadCount: sql`${groupMembers.unreadCount} + 1`,
+            unreadCount: sql`${groupMember.unreadCount} + 1`,
           })
           .where(
             and(
-              eq(groupMembers.groupId, input.receiverId),
-              not(eq(groupMembers.userId, user.id))
+              eq(groupMember.groupId, input.receiverId),
+              not(eq(groupMember.userId, currentUser.id))
             )
           );
       }
 
-      return message;
-    }),
-
-  markAsRead: protectedProcedure
-    .input(
-      z.object({
-        targetId: z.string(),
-        type: z.enum(['private', 'group']),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { user } = ctx;
-
-      if (input.type === 'private') {
-        await db
-          .update(friends)
-          .set({
-            unreadCount: 0,
-          })
-          .where(
-            and(
-              eq(friends.status, 'accepted'),
-              eq(friends.userId, user.id),
-              eq(friends.friendId, input.targetId)
-            )
-          );
-      } else {
-        await db
-          .update(groupMembers)
-          .set({
-            unreadCount: 0,
-          })
-          .where(
-            and(
-              eq(groupMembers.groupId, input.targetId),
-              eq(groupMembers.userId, user.id)
-            )
-          );
-      }
-
-      return { success: true };
+      return newMessage;
     }),
 });
